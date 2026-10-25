@@ -1,0 +1,592 @@
+{
+  "steps": [
+    {
+      "id": 1,
+      "title": "Приложение работает локально",
+      "goal": "Запустить сервис на своём компьютере в отдельном окружении",
+      "intro": "Прежде чем переносить приложение на сервер, нужно уметь запускать его одной понятной командой без IDE. Тогда тот же порядок действий повторится и на сервере.",
+      "cheatsheet": [
+        "python3 -m venv .venv",
+        "source .venv/bin/activate",
+        "python -m pip install -r requirements.txt",
+        "python -m uvicorn app_final:app --host 127.0.0.1 --port 8000",
+        "curl http://127.0.0.1:8000/health"
+      ],
+      "questions": [
+        {
+          "id": "1-1",
+          "type": "single",
+          "text": "Зачем проекту отдельное виртуальное окружение .venv?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Чтобы приложение работало быстрее"
+            },
+            {
+              "id": "b",
+              "text": "Чтобы пакеты проекта не смешивались с пакетами других проектов и системного Python"
+            },
+            {
+              "id": "c",
+              "text": "Чтобы код автоматически попал на сервер"
+            },
+            {
+              "id": "d",
+              "text": "Без него Python не запускается"
+            }
+          ],
+          "answer": "b",
+          "explanation": "venv — это свой интерпретатор и своя папка для пакетов. Проект A может требовать одну версию библиотеки, проект B — другую, и они не мешают друг другу."
+        },
+        {
+          "id": "1-2",
+          "type": "command",
+          "text": "Введите команду, которая создаёт виртуальное окружение в папке .venv",
+          "placeholder": "python3 ...",
+          "accepted": [
+            "python3 -m venv .venv",
+            "python -m venv .venv"
+          ],
+          "explanation": "python3 -m venv .venv запускает встроенный модуль venv. Затем окружение активируют: source .venv/bin/activate.",
+          "output": [
+            "# venv при успехе ничего не печатает. Проверим:",
+            "$ ls -a",
+            ".  ..  .venv  app_final.py  requirements.txt  steps.json"
+          ]
+        },
+        {
+          "id": "1-3",
+          "type": "command",
+          "text": "Окружение активировано. Установите зависимости из файла requirements.txt",
+          "placeholder": "python -m pip ...",
+          "accepted": [
+            "python -m pip install -r requirements.txt",
+            "python3 -m pip install -r requirements.txt",
+            "pip install -r requirements.txt",
+            "pip3 install -r requirements.txt"
+          ],
+          "explanation": "Флаг -r означает «прочитать список пакетов из файла». Форма python -m pip надёжнее: она гарантирует, что пакеты встанут именно в тот Python, который запускает проект.",
+          "output": [
+            "Collecting fastapi==0.162.0",
+            "Collecting uvicorn==0.54.0",
+            "Installing collected packages: ... fastapi, uvicorn",
+            "Successfully installed fastapi-0.162.0 uvicorn-0.54.0"
+          ]
+        },
+        {
+          "id": "1-4",
+          "type": "single",
+          "text": "Вы запускаете приложение и видите это. Какая причина самая вероятная?",
+          "options": [
+            {
+              "id": "a",
+              "text": "В коде синтаксическая ошибка"
+            },
+            {
+              "id": "b",
+              "text": "Порт 8000 занят другим процессом"
+            },
+            {
+              "id": "c",
+              "text": "Окружение не активировано или зависимости не установлены"
+            },
+            {
+              "id": "d",
+              "text": "FastAPI не работает на Linux"
+            }
+          ],
+          "answer": "c",
+          "explanation": "Traceback читают с последней строки. «No module named» значит, что выбранный Python не видит пакет: забыли source .venv/bin/activate или pip install -r requirements.txt.",
+          "log": [
+            "$ python -m uvicorn app_final:app",
+            "Traceback (most recent call last):",
+            "  File \"app_final.py\", line 14, in <module>",
+            "    from fastapi import FastAPI",
+            "ModuleNotFoundError: No module named 'fastapi'"
+          ]
+        },
+        {
+          "id": "1-5",
+          "type": "single",
+          "text": "Где правильно хранить пароль от базы данных или API-токен?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Прямо в коде, в переменной TOKEN"
+            },
+            {
+              "id": "b",
+              "text": "В README, чтобы все знали"
+            },
+            {
+              "id": "c",
+              "text": "В переменной окружения или в файле .env, который не попадает в Git"
+            },
+            {
+              "id": "d",
+              "text": "В requirements.txt"
+            }
+          ],
+          "answer": "c",
+          "explanation": "Секреты отделяют от кода: приложение читает их через os.getenv. В репозиторий кладут только шаблон .env.example без настоящих значений."
+        },
+        {
+          "id": "1-6",
+          "type": "single",
+          "text": "Сервер запущен. Какой командой быстрее всего проверить, что он жив?",
+          "options": [
+            {
+              "id": "a",
+              "text": "curl http://127.0.0.1:8000/health"
+            },
+            {
+              "id": "b",
+              "text": "ping 8000"
+            },
+            {
+              "id": "c",
+              "text": "ls /health"
+            },
+            {
+              "id": "d",
+              "text": "python3 /health"
+            }
+          ],
+          "answer": "a",
+          "explanation": "curl выступает клиентом и отправляет HTTP-запрос. Маршрут /health специально сделан для такой проверки и отвечает {\"status\": \"ok\"}."
+        }
+      ],
+      "host": "laptop",
+      "icon": "laptop"
+    },
+    {
+      "id": 2,
+      "title": "Код в GitHub",
+      "goal": "Сохранить историю проекта и получить ссылку, по которой код заберёт сервер",
+      "intro": "Сервер не видит ваш ноутбук. Самый простой способ передать ему код — удалённый репозиторий: вы делаете push, сервер делает clone.",
+      "cheatsheet": [
+        "git init",
+        "git status",
+        "git add .",
+        "git commit -m \"Add health endpoint\"",
+        "git remote add origin https://github.com/USERNAME/REPO.git",
+        "git push -u origin main"
+      ],
+      "questions": [
+        {
+          "id": "2-1",
+          "type": "multi",
+          "text": "Что НЕ должно попасть в репозиторий? Выберите все верные варианты.",
+          "options": [
+            {
+              "id": "a",
+              "text": ".venv/"
+            },
+            {
+              "id": "b",
+              "text": "requirements.txt"
+            },
+            {
+              "id": "c",
+              "text": ".env"
+            },
+            {
+              "id": "d",
+              "text": "__pycache__/"
+            },
+            {
+              "id": "e",
+              "text": ".env.example"
+            },
+            {
+              "id": "f",
+              "text": "app_final.py"
+            }
+          ],
+          "answer": [
+            "a",
+            "c",
+            "d"
+          ],
+          "explanation": "Окружение и кеши пересоздаются, а .env хранит настоящие секреты. В Git хранят рецепт (requirements.txt, .env.example) и код. Исключения записывают в .gitignore."
+        },
+        {
+          "id": "2-2",
+          "type": "order",
+          "text": "Расставьте шаги отправки изменений в правильном порядке.",
+          "options": [
+            {
+              "id": "push",
+              "text": "git push"
+            },
+            {
+              "id": "add",
+              "text": "git add app_final.py"
+            },
+            {
+              "id": "status",
+              "text": "git status"
+            },
+            {
+              "id": "commit",
+              "text": "git commit -m \"Add version endpoint\""
+            }
+          ],
+          "answer": [
+            "status",
+            "add",
+            "commit",
+            "push"
+          ],
+          "explanation": "Сначала смотрим, что изменилось (status), затем выбираем файлы (add), фиксируем в истории (commit) и отправляем на GitHub (push)."
+        },
+        {
+          "id": "2-3",
+          "type": "command",
+          "text": "Remote origin уже добавлен. Отправьте ветку main на GitHub в первый раз и свяжите её с удалённой веткой.",
+          "placeholder": "git push ...",
+          "accepted": [
+            "git push -u origin main",
+            "git push --set-upstream origin main"
+          ],
+          "explanation": "Флаг -u связывает локальную main с origin/main. Дальше достаточно писать просто git push.",
+          "output": [
+            "Enumerating objects: 14, done.",
+            "Writing objects: 100% (14/14), 9.8 KiB, done.",
+            "To https://github.com/student/deploy-quest.git",
+            " * [new branch]      main -> main",
+            "branch 'main' set up to track 'origin/main'."
+          ]
+        },
+        {
+          "id": "2-4",
+          "type": "single",
+          "text": "Вы случайно закоммитили настоящий токен, а следующим коммитом удалили его. Что нужно сделать?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Ничего, файл уже удалён"
+            },
+            {
+              "id": "b",
+              "text": "Отозвать токен и выпустить новый: старый остался в истории Git"
+            },
+            {
+              "id": "c",
+              "text": "Переименовать репозиторий"
+            },
+            {
+              "id": "d",
+              "text": "Сделать репозиторий публичным"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Git хранит все прошлые версии. Любой, кто склонирует репозиторий, найдёт токен в старом коммите. Утёкший секрет считают скомпрометированным и сразу отзывают."
+        },
+        {
+          "id": "2-5",
+          "type": "single",
+          "text": "Чем Git отличается от GitHub?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Это одно и то же"
+            },
+            {
+              "id": "b",
+              "text": "Git — программа на компьютере, хранит историю локально; GitHub — сервис для удалённых репозиториев"
+            },
+            {
+              "id": "c",
+              "text": "GitHub работает без интернета, а Git нет"
+            },
+            {
+              "id": "d",
+              "text": "Git нужен только для Python"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Git работает и без интернета. GitHub даёт удалённую копию, ссылку и совместный доступ — именно оттуда сервер получит код."
+        }
+      ],
+      "host": "laptop",
+      "icon": "git"
+    },
+    {
+      "id": 3,
+      "title": "Выбор сервера",
+      "goal": "Понять, где будет работать приложение, когда ноутбук закрыт",
+      "intro": "Ноутбук выключается, засыпает и сидит за NAT роутера. Для публичного сервиса нужен компьютер, который работает круглосуточно и имеет публичный IP-адрес.",
+      "cheatsheet": [
+        "Тип: VPS / виртуальная машина",
+        "ОС: Ubuntu Server LTS",
+        "Для учебного FastAPI: 1–2 vCPU, 1–2 ГБ RAM",
+        "Записать: публичный IP, имя пользователя, SSH-ключ"
+      ],
+      "questions": [
+        {
+          "id": "3-1",
+          "type": "single",
+          "text": "Почему приложение, запущенное на домашнем ноутбуке, обычно не открывается из интернета?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Python не умеет работать с интернетом"
+            },
+            {
+              "id": "b",
+              "text": "У ноутбука частный IP за NAT роутера, и он может быть выключен"
+            },
+            {
+              "id": "c",
+              "text": "Браузеры блокируют FastAPI"
+            },
+            {
+              "id": "d",
+              "text": "Нужно купить домен, и всё заработает"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Адреса 192.168.x.x, 10.x.x.x работают только внутри локальной сети. Снаружи виден публичный адрес роутера, а не вашего ноутбука."
+        },
+        {
+          "id": "3-2",
+          "type": "single",
+          "text": "Нужно запустить свой FastAPI-процесс, настроить systemd и Nginx. Какой тип хостинга подходит?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Shared-хостинг для PHP-сайтов"
+            },
+            {
+              "id": "b",
+              "text": "VPS — виртуальный сервер с полным доступом к ОС"
+            },
+            {
+              "id": "c",
+              "text": "Облачный диск для файлов"
+            },
+            {
+              "id": "d",
+              "text": "Конструктор сайтов"
+            }
+          ],
+          "answer": "b",
+          "explanation": "На VPS вы управляете ОС: ставите пакеты, запускаете процессы, настраиваете сервисы. Shared-хостинг не даёт такого контроля."
+        },
+        {
+          "id": "3-3",
+          "type": "single",
+          "text": "Какую ОС разумнее выбрать для сервера учебного проекта?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Ubuntu Server LTS"
+            },
+            {
+              "id": "b",
+              "text": "Windows 11 Home"
+            },
+            {
+              "id": "c",
+              "text": "Любую, лишь бы с графическим интерфейсом"
+            },
+            {
+              "id": "d",
+              "text": "macOS"
+            }
+          ],
+          "answer": "a",
+          "explanation": "LTS — версия с долгой поддержкой обновлений безопасности. Серверу графический интерфейс не нужен: управление идёт через SSH и терминал."
+        },
+        {
+          "id": "3-4",
+          "type": "single",
+          "text": "Какой конфигурации достаточно для маленького FastAPI-сервиса без нейросетей?",
+          "options": [
+            {
+              "id": "a",
+              "text": "32 vCPU, 128 ГБ RAM и GPU"
+            },
+            {
+              "id": "b",
+              "text": "1–2 vCPU и 1–2 ГБ RAM"
+            },
+            {
+              "id": "c",
+              "text": "Нужен минимум 1 ТБ SSD"
+            },
+            {
+              "id": "d",
+              "text": "Только выделенный физический сервер"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Простой API почти не нагружает процессор и занимает десятки мегабайт памяти. GPU и много RAM нужны для ML-задач, а не для учебного сервиса."
+        },
+        {
+          "id": "3-5",
+          "type": "multi",
+          "text": "Что нужно знать, чтобы подключиться к новому серверу? Выберите все верные варианты.",
+          "options": [
+            {
+              "id": "a",
+              "text": "Публичный IP-адрес сервера"
+            },
+            {
+              "id": "b",
+              "text": "Имя пользователя на сервере"
+            },
+            {
+              "id": "c",
+              "text": "Приватный SSH-ключ на вашем компьютере"
+            },
+            {
+              "id": "d",
+              "text": "Пароль от GitHub"
+            },
+            {
+              "id": "e",
+              "text": "Порт 8000"
+            }
+          ],
+          "answer": [
+            "a",
+            "b",
+            "c"
+          ],
+          "explanation": "Для SSH нужны адрес, пользователь и ключ. GitHub тут ни при чём, а порт 8000 — это порт приложения, а не SSH (у SSH обычно 22)."
+        }
+      ],
+      "host": "laptop",
+      "icon": "server"
+    },
+    {
+      "id": 4,
+      "title": "Подключение по SSH",
+      "goal": "Безопасно войти на сервер и работать в его терминале",
+      "intro": "SSH даёт терминал удалённого компьютера через зашифрованное соединение. Все команды, которые вы выполняли локально, теперь можно выполнить на сервере.",
+      "cheatsheet": [
+        "ssh-keygen -t ed25519",
+        "cat ~/.ssh/id_ed25519.pub   # этот ключ отдаём серверу",
+        "ssh user@PUBLIC_IP",
+        "whoami && hostname",
+        "exit"
+      ],
+      "questions": [
+        {
+          "id": "4-1",
+          "type": "command",
+          "text": "Создайте пару SSH-ключей современного типа ed25519.",
+          "placeholder": "ssh-keygen ...",
+          "accepted": [
+            "ssh-keygen -t ed25519"
+          ],
+          "explanation": "ssh-keygen создаёт два файла: приватный ~/.ssh/id_ed25519 и публичный ~/.ssh/id_ed25519.pub.",
+          "output": [
+            "Generating public/private ed25519 key pair.",
+            "Your identification has been saved in ~/.ssh/id_ed25519",
+            "Your public key has been saved in ~/.ssh/id_ed25519.pub"
+          ]
+        },
+        {
+          "id": "4-2",
+          "type": "single",
+          "text": "Какой ключ передают серверу (например, при создании ВМ в облаке)?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Приватный id_ed25519"
+            },
+            {
+              "id": "b",
+              "text": "Публичный id_ed25519.pub"
+            },
+            {
+              "id": "c",
+              "text": "Оба"
+            },
+            {
+              "id": "d",
+              "text": "Никакой, нужен только пароль"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Публичный ключ — это «замок», его можно раздавать. Приватный — «ключ от замка», он никогда не покидает ваш компьютер."
+        },
+        {
+          "id": "4-3",
+          "type": "command",
+          "text": "Подключитесь к серверу 203.0.113.10 под пользователем deploy.",
+          "placeholder": "ssh ...",
+          "accepted": [
+            "ssh deploy@203.0.113.10",
+            "ssh -l deploy 203.0.113.10"
+          ],
+          "explanation": "Формат: ssh пользователь@адрес. После входа prompt покажет имя сервера — проверьте, что вы именно там, где думаете.",
+          "output": [
+            "Welcome to Ubuntu 24.04 LTS (GNU/Linux x86_64)",
+            "Last login: Sun Oct 25 21:40:12 2026",
+            "# Вы на сервере. Prompt сменился на deploy@quest-server"
+          ]
+        },
+        {
+          "id": "4-4",
+          "type": "single",
+          "text": "Почему приложение не стоит запускать под пользователем root?",
+          "options": [
+            {
+              "id": "a",
+              "text": "root работает медленнее"
+            },
+            {
+              "id": "b",
+              "text": "Ошибка или взлом приложения получит полный контроль над системой"
+            },
+            {
+              "id": "c",
+              "text": "Под root не работает Python"
+            },
+            {
+              "id": "d",
+              "text": "Так требует GitHub"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Принцип минимальных прав: обычный пользователь и sudo только для отдельных административных команд. Тогда ошибка в приложении не сломает всю ОС."
+        },
+        {
+          "id": "4-5",
+          "type": "single",
+          "text": "Команда ssh долго висит и падает с ошибкой. Что проверить в первую очередь?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Версию Python на сервере"
+            },
+            {
+              "id": "b",
+              "text": "Верный ли IP и разрешён ли порт 22 в firewall / группе безопасности"
+            },
+            {
+              "id": "c",
+              "text": "Файл requirements.txt"
+            },
+            {
+              "id": "d",
+              "text": "Работает ли FastAPI"
+            }
+          ],
+          "answer": "b",
+          "explanation": "Timeout значит, что ответ не пришёл совсем: пакеты теряются по дороге или режутся фильтром. Connection refused — другое: машина доступна, но на порту никто не слушает.",
+          "log": [
+            "$ ssh deploy@203.0.113.10",
+            "ssh: connect to host 203.0.113.10 port 22: Connection timed out"
+          ]
+        }
+      ],
+      "host": "laptop",
+      "icon": "key"
+    }
+  ]
+}
