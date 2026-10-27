@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Download repository
         uses: actions/checkout@v7
@@ -36,7 +36,7 @@ jobs:
 
   package:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Download repository
         uses: actions/checkout@v7
