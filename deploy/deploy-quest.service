@@ -1,0 +1,20 @@
+# systemd-сервис Deploy Quest.
+# Установка:  sudo cp deploy/deploy-quest.service /etc/systemd/system/
+#             sudo systemctl daemon-reload && sudo systemctl enable --now deploy-quest
+# Если логин на сервере не maxim, замените maxim во всех строках ниже.
+
+[Unit]
+Description=Deploy Quest (FastAPI game about deploying apps)
+After=network.target
+
+[Service]
+User=maxim
+WorkingDirectory=/home/maxim/deploy-quest
+EnvironmentFile=/home/maxim/deploy-quest/.env
+# Слушаем только 127.0.0.1: снаружи приложение доступно лишь через Nginx
+ExecStart=/home/maxim/deploy-quest/.venv/bin/python -m uvicorn app_final:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
